@@ -183,13 +183,13 @@ The +/- operation determines inclusion/exclusion of the current line."
          (overlay-put easy-kill-candidate 'zap-char c)
          (overlay-put easy-kill-candidate 'zap-pos pos)))))
 
-;;;###autoload (autoload 'easy-kill-on-string-to-char-forward)
+;;;###autoload (autoload 'easy-kill-on-string-to-char-forward "easy-kill-extras")
 (easy-kill-defun-string-to-char t nil)
-;;;###autoload (autoload 'easy-kill-on-string-to-char-backward)
+;;;###autoload (autoload 'easy-kill-on-string-to-char-backward "easy-kill-extras")
 (easy-kill-defun-string-to-char t t)
-;;;###autoload (autoload 'easy-kill-on-string-up-to-char-forward)
+;;;###autoload (autoload 'easy-kill-on-string-up-to-char-forward "easy-kill-extras")
 (easy-kill-defun-string-to-char nil nil)
-;;;###autoload (autoload 'easy-kill-on-string-up-to-char-backward)
+;;;###autoload (autoload 'easy-kill-on-string-up-to-char-backward "easy-kill-extras")
 (easy-kill-defun-string-to-char nil t)
 
 ;;; easy-kill-extras.el ends here

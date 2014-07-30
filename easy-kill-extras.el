@@ -111,7 +111,9 @@
   (easy-mark n))
 
 ;;;###autoload
-(put 'easy-kill-delete-region 'easy-kill-exit t)
+(eval-after-load 'easy-kill
+  '(put 'easy-kill-delete-region 'easy-kill-exit t))
+
 ;;;###autoload
 (defun easy-kill-delete-region ()
   "Delete the easy-kill selection without modifying the kill ring."
@@ -120,7 +122,8 @@
     (`(,beg . ,end) (delete-region beg end))))
 
 ;;;###autoload
-(define-key easy-kill-base-map [remap delete-region] 'easy-kill-delete-region)
+(eval-after-load 'easy-kill
+  '(define-key easy-kill-base-map [remap delete-region] 'easy-kill-delete-region))
 
 ;;;###autoload
 (defun easy-kill-on-buffer (n)
@@ -155,7 +158,6 @@ The +/- operation determines inclusion/exclusion of the current line."
                                      (_
                                       (point)))))
 
-;;;###autoload
 (defmacro easy-kill-defun-string-to-char (include backward)
   "Macro to define string-to-char functions."
   (let ((name (intern (format "string-%s-char-%s"
@@ -195,14 +197,15 @@ The +/- operation determines inclusion/exclusion of the current line."
          (overlay-put easy-kill-candidate 'zap-char c)
          (overlay-put easy-kill-candidate 'zap-pos pos)))))
 
-;;;###autoload (autoload 'easy-kill-on-string-to-char-forward "easy-kill-extras")
 (easy-kill-defun-string-to-char t nil)
-;;;###autoload (autoload 'easy-kill-on-string-to-char-backward "easy-kill-extras")
 (easy-kill-defun-string-to-char t t)
-;;;###autoload (autoload 'easy-kill-on-string-up-to-char-forward "easy-kill-extras")
 (easy-kill-defun-string-to-char nil nil)
-;;;###autoload (autoload 'easy-kill-on-string-up-to-char-backward "easy-kill-extras")
 (easy-kill-defun-string-to-char nil t)
+
+;;;###autoload (autoload 'easy-kill-on-string-to-char-forward "easy-kill-extras")
+;;;###autoload (autoload 'easy-kill-on-string-to-char-backward "easy-kill-extras")
+;;;###autoload (autoload 'easy-kill-on-string-up-to-char-forward "easy-kill-extras")
+;;;###autoload (autoload 'easy-kill-on-string-up-to-char-backward "easy-kill-extras")
 
 (provide 'easy-kill-extras)
 ;;; easy-kill-extras.el ends here

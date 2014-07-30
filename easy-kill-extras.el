@@ -192,4 +192,5 @@ The +/- operation determines inclusion/exclusion of the current line."
 ;;;###autoload (autoload 'easy-kill-on-string-up-to-char-backward "easy-kill-extras")
 (easy-kill-defun-string-to-char nil t)
 
+(provide 'easy-kill-extras)
 ;;; easy-kill-extras.el ends here

@@ -42,6 +42,15 @@
 ;;
 ;; It also provides the following easy-kill/easy-mark targets:
 ;;
+;; * `buffer'
+;;
+;;   This selects the whole buffer.
+;;
+;; * `buffer-before-point'
+;; * `buffer-after-point'
+;;
+;;   These work like vi's gg/G commands, respectively.
+;;
 ;; * `string-to-char-forward'
 ;; * `string-to-char-backward'
 ;; * `string-up-to-char-forward'
@@ -63,6 +72,9 @@
 ;;
 ;;   ;; Add the following tuples to `easy-kill-alist', preferrably by
 ;;   ;; using `customize-variable'.
+;;   (add-to-list 'easy-kill-alist '(?b buffer ""))
+;;   (add-to-list 'easy-kill-alist '(?< buffer-before-point ""))
+;;   (add-to-list 'easy-kill-alist '(?> buffer-after-point ""))
 ;;   (add-to-list 'easy-kill-alist '(?f string-to-char-forward ""))
 ;;   (add-to-list 'easy-kill-alist '(?F string-up-to-char-forward ""))
 ;;   (add-to-list 'easy-kill-alist '(?t string-to-char-backward ""))

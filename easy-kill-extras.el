@@ -132,7 +132,7 @@
 
 ;;;###autoload
 (defun easy-kill-on-buffer-after-point (n)
-  "Provide an easy-kill target `buffer-after-point'.
+  "Provide an easy-kill target `buffer-after-point', which works like vi's `>' command.
 The +/- operation determines inclusion/exclusion of the current line."
   (easy-kill-adjust-candidate 'buffer-after-point
                               (pcase n
@@ -146,7 +146,7 @@ The +/- operation determines inclusion/exclusion of the current line."
 
 ;;;###autoload
 (defun easy-kill-on-buffer-before-point (n)
-  "Provide an easy-kill target `buffer-before-point'.
+  "Provide an easy-kill target `buffer-before-point', which works like vi's `<' command.
 The +/- operation determines inclusion/exclusion of the current line."
        (easy-kill-adjust-candidate 'buffer-before-point
                                    (point-min)
@@ -168,7 +168,10 @@ The +/- operation determines inclusion/exclusion of the current line."
                         (if backward "backward" "forward")))
         (search-func (if backward 'search-backward 'search-forward)))
     `(defun ,(intern (format "easy-kill-on-%s" name)) (n)
-       ,(format "Provide an easy-kill-target `%s'." name)
+       ,(format "Provide an easy-kill-target `%s', which works like vi's `%s' command."
+                name
+                (if include (if backward "F" "f")
+                  (if backward "T" "t")))
        (interactive)
        (let* ((c (or (easy-kill-get zap-char)
                      (read-char ,prompt t)))

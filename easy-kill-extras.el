@@ -179,6 +179,7 @@ The +/- operation determines inclusion/exclusion of the current line."
                             (and (setq pos (easy-kill-get zap-pos))
                                  (not (eq this-command 'easy-kill-digit-argument))
                                  (goto-char pos))
+                            ,@(unless backward '((forward-char)))
                             (,search-func (char-to-string c) nil nil n)
                             (point)))
                          ((eq n '+)

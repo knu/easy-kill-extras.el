@@ -160,14 +160,17 @@ The +/- operation determines inclusion/exclusion of the current line."
 
 (defmacro easy-kill-defun-string-to-char (include backward)
   "Macro to define string-to-char functions."
-  (let ((name (intern (format "string-%s-char-%s"
-                              (if include "to" "up-to")
-                              (if backward "backward" "forward"))))
-        (prompt (format "%s character %s: "
-                        (if include "To" "Up to")
-                        (if backward "backward" "forward")))
-        (search-func (if backward 'search-backward 'search-forward)))
-    `(defun ,(intern (format "easy-kill-on-%s" name)) (n)
+  (let* ((command-prefix "easy-kill-on-")
+         (format-name (lambda (include_ backward_ &optional prefix)
+                        (format "string-%s-char-%s"
+                                (if include_ "to" "up-to")
+                                (if backward_ "backward" "forward"))))
+         (name (funcall format-name include backward))
+         (prompt (format "%s character %s: "
+                         (if include "To" "Up to")
+                         (if backward "backward" "forward")))
+         (search-func (if backward 'search-backward 'search-forward)))
+    `(defun ,(intern (concat command-prefix name)) (n)
        ,(format "Provide an easy-kill-target `%s', which works like vi's `%s' command."
                 name
                 (if include (if backward "F" "f")
@@ -176,30 +179,40 @@ The +/- operation determines inclusion/exclusion of the current line."
        (let* ((c (or (easy-kill-get zap-char)
                      (read-char ,prompt t)))
               (beg (point))
+              (pos (easy-kill-get zap-pos))
               (pos (cond ((natnump n)
-                          (save-excursion
-                            ;; expand if called consecutively
-                            (and (setq pos (easy-kill-get zap-pos))
-                                 (not (eq this-command 'easy-kill-digit-argument))
-                                 (goto-char pos))
-                            ,@(unless backward '((forward-char)))
-                            (,search-func (char-to-string c) nil nil n)
-                            (point)))
+                          (cond ((and pos
+                                      (not (eq this-command 'easy-kill-digit-argument)))
+                                 ;; if called consecutively, expand or shrink
+                                 (if ,(if backward '(<= pos beg) '(<= beg pos))
+                                     (save-excursion
+                                       (goto-char pos)
+                                       ,@(unless backward '((forward-char)))
+                                       (,search-func (char-to-string c) nil nil n)
+                                       (point))
+                                   (,(intern (concat command-prefix (funcall format-name include (not backward)))) '-)
+                                   nil))
+                                (t
+                                 (save-excursion
+                                   ,@(unless backward '((forward-char)))
+                                   (,search-func (char-to-string c) nil nil n)
+                                   (point)))))
                          ((eq n '+)
                           (save-excursion
-                            (goto-char (easy-kill-get zap-pos))
+                            (goto-char pos)
                             (,search-func (char-to-string c))
                             (point)))
                          ((eq n '-)
                           (save-excursion
-                            (goto-char (,(if backward '1+ '1-) (easy-kill-get zap-pos)))
+                            (goto-char (,(if backward '1+ '1-) pos))
                             (,search-func (char-to-string c) beg nil -1)
                             (,(if backward '1- '1+) (point)))))))
-         (easy-kill-adjust-candidate ',name
-                                     beg ,(if include 'pos
-                                            (if backward '(1+ pos) '(1- pos))))
-         (overlay-put easy-kill-candidate 'zap-char c)
-         (overlay-put easy-kill-candidate 'zap-pos pos)))))
+         (when pos
+           (easy-kill-adjust-candidate ',name
+                                       beg ,(if include 'pos
+                                              (if backward '(1+ pos) '(1- pos))))
+           (overlay-put easy-kill-candidate 'zap-char c)
+           (overlay-put easy-kill-candidate 'zap-pos pos))))))
 
 (easy-kill-defun-string-to-char t nil)
 (easy-kill-defun-string-to-char t t)

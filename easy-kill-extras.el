@@ -132,7 +132,7 @@
 
 ;;;###autoload
 (defun easy-kill-on-buffer-after-point (n)
-  "Provide an easy-kill target `buffer-after-point', which works like vi's `>' command.
+  "Provide an easy-kill target `buffer-after-point', which works like vi's `G' command.
 The +/- operation determines inclusion/exclusion of the current line."
   (easy-kill-adjust-candidate 'buffer-after-point
                               (pcase n
@@ -146,7 +146,7 @@ The +/- operation determines inclusion/exclusion of the current line."
 
 ;;;###autoload
 (defun easy-kill-on-buffer-before-point (n)
-  "Provide an easy-kill target `buffer-before-point', which works like vi's `<' command.
+  "Provide an easy-kill target `buffer-before-point', which works like vi's `gg' command.
 The +/- operation determines inclusion/exclusion of the current line."
        (easy-kill-adjust-candidate 'buffer-before-point
                                    (point-min)

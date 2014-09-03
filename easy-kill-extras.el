@@ -28,7 +28,7 @@
 ;; Author: Akinori MUSHA <knu@iDaemons.org>
 ;; URL: https://github.com/knu/easy-kill-extras.el
 ;; Created: 29 Jul 2014
-;; Version: 0.9.1
+;; Version: 0.9.2
 ;; Package-Requires: ((easy-kill "0.9.4"))
 ;; Keywords: killing, convenience
 
@@ -38,6 +38,8 @@
 ;;
 ;; * easy-mark-word
 ;; * easy-mark-sexp
+;; * easy-mark-to-char
+;; * easy-mark-up-to-char
 ;; * easy-kill-delete-region
 ;;
 ;; It also provides the following easy-kill/easy-mark targets:
@@ -65,6 +67,10 @@
 ;;   (global-set-key (kbd "M-@") 'easy-mark-word)
 ;;   (global-set-key (kbd "C-M-@") 'easy-mark-sexp)
 ;;
+;;   ;; `easy-mark-to-char' or `easy-mark-up-to-char' could be a good
+;;   ;; replacement for `zap-to-char'.
+;;   (global-set-key [remap zap-to-char] 'easy-mark-to-char)
+;;
 ;;   ;; `delete-region' is automatically remapped, but you'll want to
 ;;   ;; have these if you are in love with `delete-selection-mode'.
 ;;   (define-key easy-kill-base-map (kbd "C-d") 'easy-kill-delete-region)
@@ -89,13 +95,18 @@
     (around per-thing activate)
   "Enable `easy-mark-word' and `easy-mark-sexp'."
   (let ((easy-mark-try-things
-         (cond ((eq this-command 'easy-mark-word)
-                (if (bound-and-true-p subword-mode)
-                    '(subword) '(word)))
-               ((eq this-command 'easy-mark-sexp)
-                '(sexp))
-               (t
-                easy-mark-try-things))))
+         (pcase this-command
+           (`easy-mark-word
+            (if (bound-and-true-p subword-mode)
+                '(subword) '(word)))
+           (`easy-mark-sexp
+            '(sexp))
+           (`easy-mark-to-char
+            '(string-to-char-forward))
+           (`easy-mark-up-to-char
+            '(string-up-to-char-forward))
+           (_
+            easy-mark-try-things))))
     ad-do-it))
 
 ;;;###autoload
@@ -107,6 +118,18 @@
 ;;;###autoload
 (defun easy-mark-sexp (n)
   "Start easy-mark with a sexp selected."
+  (interactive "p")
+  (easy-mark n))
+
+;;;###autoload
+(defun easy-mark-to-char (n)
+  "Start easy-mark with string-to-char-forward."
+  (interactive "p")
+  (easy-mark n))
+
+;;;###autoload
+(defun easy-mark-up-to-char (n)
+  "Start easy-mark with string-up-to-char-forward."
   (interactive "p")
   (easy-mark n))
 

@@ -53,6 +53,12 @@
 ;;
 ;;   These work like vi's gg/G commands, respectively.
 ;;
+;; * `backward-line-edge'
+;; * `forward-line-edge'
+;;
+;;   The former is like vi's ^/0 commands, and the latter is just like
+;;   that in the opposite direction.
+;;
 ;; * `string-to-char-forward'
 ;; * `string-to-char-backward'
 ;; * `string-up-to-char-forward'
@@ -78,6 +84,8 @@
 ;;
 ;;   ;; Add the following tuples to `easy-kill-alist', preferrably by
 ;;   ;; using `customize-variable'.
+;;   (add-to-list 'easy-kill-alist '(?^ backward-line-edge ""))
+;;   (add-to-list 'easy-kill-alist '(?$ forward-line-edge ""))
 ;;   (add-to-list 'easy-kill-alist '(?b buffer ""))
 ;;   (add-to-list 'easy-kill-alist '(?< buffer-before-point ""))
 ;;   (add-to-list 'easy-kill-alist '(?> buffer-after-point ""))
@@ -147,6 +155,72 @@
 ;;;###autoload
 (eval-after-load 'easy-kill
   '(define-key easy-kill-base-map [remap delete-region] 'easy-kill-delete-region))
+
+;;;###autoload
+(defun forward-line-edge (arg)
+  "Move between line edges.  ARG specifies which edge to move to.
+
+If ARG is -2 or less, move to the BOL.
+
+If ARG is -1, move to the first non-whitespace character after
+the point on the line, or BOL if there is none.
+
+If ARG is 0, stay.
+
+If ARG is 1, move to the position right after the last
+non-whitespace character after the point on the line, or EOL if
+there is none.
+
+If ARG is 2 or greater, move to the EOL."
+  (interactive "p")
+  (pcase arg
+    (0)
+    (1
+     (if (looking-at "\\(.*[^[:space:]]\\)[[:space:]]+$")
+         (goto-char (match-end 1))
+       (end-of-line)))
+    ((pred (<= 2))
+     (end-of-line))
+    (-1
+     (if (looking-back "^[[:space:]]*")
+         (beginning-of-line)
+       (back-to-indentation)))
+    (_
+     (beginning-of-line))))
+
+;;;###autoload
+(defun backward-line-edge (arg)
+  "Equivalent to `forward-line-edge' with a negative ARG."
+  (interactive "p")
+  (forward-line-edge (- arg)))
+
+;;;###autoload
+(defun easy-kill-on-forward-line-edge (n)
+  "Provide an easy-kill target `forward-line-edge', which works like vi's `^'/`0' commands in the opposite direction."
+  (easy-kill-adjust-candidate 'forward-line-edge
+                              (point)
+                              (save-excursion
+                                (forward-line-edge
+                                 (pcase n
+                                   (`+ 2)
+                                   (`- 1)
+                                   (1 (if (eq (easy-kill-get thing) 'forward-line-edge) 2 1))
+                                   (_ n)))
+                                (point))))
+
+;;;###autoload
+(defun easy-kill-on-backward-line-edge (n)
+  "Provide an easy-kill target `backward-line-edge', which works like vi's `^'/`0' commands."
+  (easy-kill-adjust-candidate 'backward-line-edge
+                              (point)
+                              (save-excursion
+                                (backward-line-edge
+                                 (pcase n
+                                   (`+ 2)
+                                   (`- 1)
+                                   (1 (if (eq (easy-kill-get thing) 'backward-line-edge) 2 1))
+                                   (_ n)))
+                                (point))))
 
 ;;;###autoload
 (defun easy-kill-on-buffer (n)

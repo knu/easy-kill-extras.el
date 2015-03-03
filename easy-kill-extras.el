@@ -350,7 +350,7 @@ The +/- operation determines inclusion/exclusion of the current line."
            (progn
              (easy-kill-abort)
              (setq easy-kill-ace-jump-this-command this-command
-                   easy-kill-ace-jump-last-command last-command
+                   easy-kill-ace-jump-last-command (if (easy-kill-get mark) 'easy-mark 'easy-kill)
                    easy-kill-ace-jump-original-pos (point)))
          (setq easy-kill-ace-jump-this-command nil
                easy-kill-ace-jump-last-command nil

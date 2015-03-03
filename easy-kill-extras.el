@@ -335,6 +335,7 @@ The +/- operation determines inclusion/exclusion of the current line."
   :type 'boolean
   :group 'easy-kill-extras)
 
+;;;###autoload (eval-after-load 'ace-jump-mode #'(require 'easy-kill-extras))
 (eval-after-load 'ace-jump-mode
   #'(progn
      (defvar easy-kill-ace-jump-last-command nil)

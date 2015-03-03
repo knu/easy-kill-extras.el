@@ -1,6 +1,6 @@
 ;;; easy-kill-extras.el --- Extra functions for easy-kill.
 
-;; Copyright (c) 2014 Akinori MUSHA
+;; Copyright (c) 2014-2015 Akinori MUSHA
 ;;
 ;; All rights reserved.
 ;;

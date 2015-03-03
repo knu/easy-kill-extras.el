@@ -66,9 +66,10 @@
 ;;
 ;;   These work like vi's f/F/t/T commands, respectively.
 ;;
-;; Experimental ace-jump support in easy-kill/easy-mark mode is
-;; enabled by default.  You can disable it via a customize variable
-;; `easy-kill-ace-jump-enable-p'.
+;; Experimental ace-jump integration into easy-kill is enabled by
+;; default.  `ace-jump-*-mode' can be invoked for selection when in
+;; easy-kill/easy-mark mode.  You can disable this feature via a
+;; customize variable `easy-kill-ace-jump-enable-p'.
 ;;
 ;; Suggested settings are as follows:
 ;;

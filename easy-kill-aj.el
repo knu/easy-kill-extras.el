@@ -37,7 +37,7 @@
 ;; easy-mark/easy-kill as measures for selection.
 ;;
 ;; This library is part of the easy-kill-extras package and not meant
-;; to be used standalone.
+;; to be loaded standalone.
 
 ;;; Code:
 

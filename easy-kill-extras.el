@@ -104,6 +104,11 @@
 (require 'easy-kill)
 
 ;;;###autoload
+(defgroup easy-kill-extras nil
+  "Extras for easy-kill."
+  :group 'killing) ;; No 'easy-kill yet
+
+;;;###autoload
 (defadvice easy-mark
     (around per-thing activate)
   "Enable `easy-mark-word' and `easy-mark-sexp'."
@@ -326,73 +331,9 @@ The +/- operation determines inclusion/exclusion of the current line."
 ;;;###autoload (autoload 'easy-kill-on-string-up-to-char-forward "easy-kill-extras")
 ;;;###autoload (autoload 'easy-kill-on-string-up-to-char-backward "easy-kill-extras")
 
-(defgroup easy-kill-extras nil
-  "Extras for easy-kill."
-  :group 'killing) ;; No 'easy-kill yet
-
-(defcustom easy-kill-ace-jump-enable-p t
-  "If non-nil, ace-jump commands can be used in easy-kill/easy-mark mode for selection."
-  :type 'boolean
-  :group 'easy-kill-extras)
-
-;;;###autoload (eval-after-load 'ace-jump-mode #'(require 'easy-kill-extras))
+;;;###autoload
 (eval-after-load 'ace-jump-mode
-  #'(progn
-     (defvar easy-kill-ace-jump-last-command nil)
-     (defvar easy-kill-ace-jump-this-command nil)
-     (defvar easy-kill-ace-jump-original-pos nil)
-
-     (defun easy-kill-ace-jump-save-state ()
-       (if (and easy-kill-ace-jump-enable-p
-                easy-kill-candidate
-                (eq (easy-kill-get buffer)
-                    (current-buffer)))
-           (progn
-             (easy-kill-abort)
-             (setq easy-kill-ace-jump-this-command this-command
-                   easy-kill-ace-jump-last-command (if (easy-kill-get mark) 'easy-mark 'easy-kill)
-                   easy-kill-ace-jump-original-pos (point)))
-         (setq easy-kill-ace-jump-this-command nil
-               easy-kill-ace-jump-last-command nil
-               easy-kill-ace-jump-original-pos nil)))
-
-     (defadvice ace-jump-char-mode (before easy-kill-extras activate)
-       (easy-kill-ace-jump-save-state))
-     (defadvice ace-jump-word-mode (before easy-kill-extras activate)
-       (easy-kill-ace-jump-save-state))
-     (defadvice ace-jump-line-mode (before easy-kill-extras activate)
-       (easy-kill-ace-jump-save-state))
-
-     (defadvice ace-jump-move (around easy-kill-extras activate)
-       (let ((mode easy-kill-ace-jump-this-command)
-             (command easy-kill-ace-jump-last-command)
-             (orig easy-kill-ace-jump-original-pos))
-         ad-do-it
-         (if command
-             (or
-              (eq easy-kill-ace-jump-last-command command) ;; branch mode
-              (let* ((pos (point))
-                     (backward (> orig pos))
-                     (line-mode (eq mode 'ace-jump-line-mode))
-                     (beg orig)
-                     (end (if line-mode pos
-                            (if backward pos (1+ pos)))))
-                (goto-char orig)
-                (funcall command)
-                (if line-mode
-                    (let ((lines (count-lines beg end)))
-                      (easy-kill-thing 'line (if backward (- 1 lines)
-                                               (1- lines))))
-                  (easy-kill-adjust-candidate
-                   (if backward 'string-to-char-backward 'string-to-char-forward)
-                   beg end)
-                  (overlay-put easy-kill-candidate 'zap-char (char-after pos))
-                  (overlay-put easy-kill-candidate 'zap-pos pos)))))))
-
-     (defadvice ace-jump-done (after easy-kill-extras activate)
-       (setq easy-kill-ace-jump-this-command nil
-             easy-kill-ace-jump-last-command nil
-             easy-kill-ace-jump-original-pos nil))))
+  #'(require 'easy-kill-aj))
 
 (provide 'easy-kill-extras)
 ;;; easy-kill-extras.el ends here

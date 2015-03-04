@@ -108,6 +108,10 @@
   "Extras for easy-kill."
   :group 'killing) ;; No 'easy-kill yet
 
+(require 'easy-kill-to-char)
+(require 'easy-kill-buffer)
+(require 'easy-kill-line-edge)
+
 ;;;###autoload
 (defadvice easy-mark
     (around per-thing activate)
@@ -140,18 +144,6 @@
   (easy-mark n))
 
 ;;;###autoload
-(defun easy-mark-to-char (n)
-  "Start easy-mark with string-to-char-forward."
-  (interactive "p")
-  (easy-mark n))
-
-;;;###autoload
-(defun easy-mark-up-to-char (n)
-  "Start easy-mark with string-up-to-char-forward."
-  (interactive "p")
-  (easy-mark n))
-
-;;;###autoload
 (eval-after-load 'easy-kill
   '(put 'easy-kill-delete-region 'easy-kill-exit t))
 
@@ -165,171 +157,6 @@
 ;;;###autoload
 (eval-after-load 'easy-kill
   '(define-key easy-kill-base-map [remap delete-region] 'easy-kill-delete-region))
-
-;;;###autoload
-(defun forward-line-edge (arg)
-  "Move between line edges.  ARG specifies which edge to move to.
-
-If ARG is -2 or less, move to the BOL.
-
-If ARG is -1, move to the first non-whitespace character after
-the point on the line, or BOL if there is none.
-
-If ARG is 0, stay.
-
-If ARG is 1, move to the position right after the last
-non-whitespace character after the point on the line, or EOL if
-there is none.
-
-If ARG is 2 or greater, move to the EOL."
-  (interactive "p")
-  (pcase arg
-    (0)
-    (1
-     (if (looking-at "\\(.*[^[:space:]]\\)[[:space:]]+$")
-         (goto-char (match-end 1))
-       (end-of-line)))
-    ((pred (<= 2))
-     (end-of-line))
-    (-1
-     (if (looking-back "^[[:space:]]*")
-         (beginning-of-line)
-       (back-to-indentation)))
-    (_
-     (beginning-of-line))))
-
-;;;###autoload
-(defun backward-line-edge (arg)
-  "Equivalent to `forward-line-edge' with a negative ARG."
-  (interactive "p")
-  (forward-line-edge (- arg)))
-
-;;;###autoload
-(defun easy-kill-on-forward-line-edge (n)
-  "Provide an easy-kill target `forward-line-edge', which works like vi's `^'/`0' commands in the opposite direction."
-  (easy-kill-adjust-candidate 'forward-line-edge
-                              (point)
-                              (save-excursion
-                                (forward-line-edge
-                                 (pcase n
-                                   (`+ 2)
-                                   (`- 1)
-                                   (1 (if (eq (easy-kill-get thing) 'forward-line-edge) 2 1))
-                                   (_ n)))
-                                (point))))
-
-;;;###autoload
-(defun easy-kill-on-backward-line-edge (n)
-  "Provide an easy-kill target `backward-line-edge', which works like vi's `^'/`0' commands."
-  (easy-kill-adjust-candidate 'backward-line-edge
-                              (point)
-                              (save-excursion
-                                (backward-line-edge
-                                 (pcase n
-                                   (`+ 2)
-                                   (`- 1)
-                                   (1 (if (eq (easy-kill-get thing) 'backward-line-edge) 2 1))
-                                   (_ n)))
-                                (point))))
-
-;;;###autoload
-(defun easy-kill-on-buffer (n)
-  "Provide an easy-kill target `buffer' which selects the whole buffer."
-  (easy-kill-adjust-candidate 'buffer (point-min) (point-max)))
-
-;;;###autoload
-(defun easy-kill-on-buffer-after-point (n)
-  "Provide an easy-kill target `buffer-after-point', which works like vi's `G' command.
-The +/- operation determines inclusion/exclusion of the current line."
-  (easy-kill-adjust-candidate 'buffer-after-point
-                              (pcase n
-                                (`+
-                                 (point-at-bol))
-                                (`-
-                                 (point-at-bol 2))
-                                (_
-                                 (point)))
-                              (point-max)))
-
-;;;###autoload
-(defun easy-kill-on-buffer-before-point (n)
-  "Provide an easy-kill target `buffer-before-point', which works like vi's `gg' command.
-The +/- operation determines inclusion/exclusion of the current line."
-       (easy-kill-adjust-candidate 'buffer-before-point
-                                   (point-min)
-                                   (pcase n
-                                     (`+
-                                      (point-at-bol 2))
-                                     (`-
-                                      (point-at-bol))
-                                     (_
-                                      (point)))))
-
-(defmacro easy-kill-defun-string-to-char (include backward)
-  "Macro to define string-to-char functions."
-  (let* ((command-prefix "easy-kill-on-")
-         (format-name (lambda (include_ backward_ &optional prefix)
-                        (format "string-%s-char-%s"
-                                (if include_ "to" "up-to")
-                                (if backward_ "backward" "forward"))))
-         (name (funcall format-name include backward))
-         (prompt (format "%s character %s: "
-                         (if include "To" "Up to")
-                         (if backward "backward" "forward")))
-         (search-func (if backward 'search-backward 'search-forward)))
-    `(defun ,(intern (concat command-prefix name)) (n)
-       ,(format "Provide an easy-kill-target `%s', which works like vi's `%s' command."
-                name
-                (if include (if backward "F" "f")
-                  (if backward "T" "t")))
-       (interactive)
-       (let* ((c (or (easy-kill-get zap-char)
-                     (read-char ,prompt t)))
-              (beg (point))
-              (pos (easy-kill-get zap-pos))
-              (pos (cond ((natnump n)
-                          (cond ((and pos
-                                      (not (eq this-command 'easy-kill-digit-argument)))
-                                 ;; if called consecutively, expand or shrink
-                                 (if ,(if backward '(<= pos beg) '(<= beg pos))
-                                     (save-excursion
-                                       (goto-char pos)
-                                       ,@(unless backward '((forward-char)))
-                                       (,search-func (char-to-string c) nil nil n)
-                                       (point))
-                                   (,(intern (concat command-prefix (funcall format-name include (not backward)))) '-)
-                                   nil))
-                                (t
-                                 (save-excursion
-                                   ,@(unless backward '((forward-char)))
-                                   (,search-func (char-to-string c) nil nil n)
-                                   (point)))))
-                         ((eq n '+)
-                          (save-excursion
-                            (goto-char pos)
-                            (,search-func (char-to-string c))
-                            (point)))
-                         ((eq n '-)
-                          (save-excursion
-                            (goto-char (,(if backward '1+ '1-) pos))
-                            (,search-func (char-to-string c) beg nil -1)
-                            (,(if backward '1- '1+) (point)))))))
-         (when pos
-           (easy-kill-adjust-candidate ',name
-                                       beg ,(if include 'pos
-                                              (if backward '(1+ pos) '(1- pos))))
-           (overlay-put easy-kill-candidate 'zap-char c)
-           (overlay-put easy-kill-candidate 'zap-pos pos))))))
-
-(easy-kill-defun-string-to-char t nil)
-(easy-kill-defun-string-to-char t t)
-(easy-kill-defun-string-to-char nil nil)
-(easy-kill-defun-string-to-char nil t)
-
-;;;###autoload (autoload 'easy-kill-on-string-to-char-forward "easy-kill-extras")
-;;;###autoload (autoload 'easy-kill-on-string-to-char-backward "easy-kill-extras")
-;;;###autoload (autoload 'easy-kill-on-string-up-to-char-forward "easy-kill-extras")
-;;;###autoload (autoload 'easy-kill-on-string-up-to-char-backward "easy-kill-extras")
 
 ;;;###autoload
 (eval-after-load 'ace-jump-mode

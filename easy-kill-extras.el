@@ -40,7 +40,6 @@
 ;; * easy-mark-sexp
 ;; * easy-mark-to-char
 ;; * easy-mark-up-to-char
-;; * easy-kill-delete-region
 ;;
 ;; It also provides the following easy-kill/easy-mark targets:
 ;;
@@ -81,11 +80,6 @@
 ;;   ;; `easy-mark-to-char' or `easy-mark-up-to-char' could be a good
 ;;   ;; replacement for `zap-to-char'.
 ;;   (global-set-key [remap zap-to-char] 'easy-mark-to-char)
-;;
-;;   ;; `delete-region' is automatically remapped, but you'll want to
-;;   ;; have these if you are in love with `delete-selection-mode'.
-;;   (define-key easy-kill-base-map (kbd "C-d") 'easy-kill-delete-region)
-;;   (define-key easy-kill-base-map (kbd "DEL") 'easy-kill-delete-region)
 ;;
 ;;   ;; Add the following tuples to `easy-kill-alist', preferrably by
 ;;   ;; using `customize-variable'.
@@ -142,21 +136,6 @@
   "Start easy-mark with a sexp selected."
   (interactive "p")
   (easy-mark n))
-
-;;;###autoload
-(eval-after-load 'easy-kill
-  '(put 'easy-kill-delete-region 'easy-kill-exit t))
-
-;;;###autoload
-(defun easy-kill-delete-region ()
-  "Delete the easy-kill selection without modifying the kill ring."
-  (interactive)
-  (pcase (easy-kill-get bounds)
-    (`(,beg . ,end) (delete-region beg end))))
-
-;;;###autoload
-(eval-after-load 'easy-kill
-  '(define-key easy-kill-base-map [remap delete-region] 'easy-kill-delete-region))
 
 ;;;###autoload
 (eval-after-load 'ace-jump-mode

@@ -72,7 +72,8 @@
                 (if include (if backward "F" "f")
                   (if backward "T" "t")))
        (interactive)
-       (let* ((c (or (easy-kill-get zap-char)
+       (let* (case-fold-search
+              (c (or (easy-kill-get zap-char)
                      (read-char ,prompt t)))
               (beg (point))
               (pos (easy-kill-get zap-pos))

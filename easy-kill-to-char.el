@@ -1,6 +1,6 @@
 ;;; easy-kill-to-char.el --- vi-like to-char/up-to-char selectors for easy-kill.
 
-;; Copyright (c) 2014-2015 Akinori MUSHA
+;; Copyright (c) 2014-2016 Akinori MUSHA
 ;;
 ;; All rights reserved.
 ;;

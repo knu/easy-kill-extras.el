@@ -1,4 +1,4 @@
-Copyright (c) 2014-2015 Akinori MUSHA
+Copyright (c) 2014-2016 Akinori MUSHA
 
 All rights reserved.
 

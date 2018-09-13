@@ -70,6 +70,10 @@
 ;; easy-kill/easy-mark mode.  You can disable this feature via a
 ;; customize variable `easy-kill-ace-jump-enable-p'.
 ;;
+;; Experimental multiple-cursors-mode support for easy-kill is enabled
+;; by default.  `easy-kill' and `easy-mark' will mostly work in
+;; `multiple-cursors-mode'.
+;;
 ;; Suggested settings are as follows:
 ;;
 ;;   ;; Upgrade `mark-word' and `mark-sexp' with easy-mark
@@ -140,6 +144,10 @@
 ;;;###autoload
 (eval-after-load 'ace-jump-mode
   #'(require 'easy-kill-aj))
+
+;;;###autoload
+(eval-after-load 'multiple-cursors
+  #'(require 'easy-kill-mc))
 
 (provide 'easy-kill-extras)
 ;;; easy-kill-extras.el ends here

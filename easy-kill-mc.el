@@ -106,8 +106,8 @@
                  (easy-kill-mc-destroy-and-save-candidate-1)
                  (add-hook 'pre-command-hook 'easy-kill-mc-destroy-and-save-candidate-1 t)))
              (error (message "%s:%s" this-command (error-message-string err))
-                    nil)))))
-       ad-do-it)))
+                    nil))))))
+    ad-do-it))
 
 (defun easy-kill-mc-destroy-and-save-candidate-1 ()
   (easy-kill-destroy-candidate)

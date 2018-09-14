@@ -45,7 +45,7 @@
 (defvar-local easy-kill-mc-easy-mark-or-kill-command nil)
 (defvar-local easy-kill-mc-executing-for-fake-cursor-p nil)
 (defvar-local easy-kill-mc-keep-keymap-p nil)
-(defvar-local easy-kill-mc-destroy-candicate-p nil)
+(defvar-local easy-kill-mc-destroy-candidate-p nil)
 
 (defadvice easy-mark
     (before easy-kill-mc activate)
@@ -63,13 +63,13 @@
     (around easy-kill-mc activate)
   (setq easy-kill-mc-executing-for-fake-cursor-p t)
   (unwind-protect
-      (if easy-kill-mc-destroy-candicate-p
+      (if easy-kill-mc-destroy-candidate-p
           (unwind-protect
               ad-do-it
             (easy-kill-mc-destroy-candidate)
-            (setq easy-kill-mc-destroy-candicate-p nil))
+            (setq easy-kill-mc-destroy-candidate-p nil))
         ad-do-it)
-    (remove-hook 'pre-command-hook 'easy-kill-mc-destroy-and-save-candidate)
+    (remove-hook 'pre-command-hook 'easy-kill-mc-destroy-and-save-candidate-1)
     (setq easy-kill-mc-executing-for-fake-cursor-p nil
           easy-kill-mc-easy-mark-or-kill-command nil)))
 
@@ -103,22 +103,22 @@
                                        (this-single-command-keys) nil t)))
                              (command-remapping cmd nil (list map))))))
                 (ignore
-                 (easy-kill-mc-destroy-and-save-candidate)
-                 (add-hook 'pre-command-hook 'easy-kill-mc-destroy-and-save-candidate)))
+                 (easy-kill-mc-destroy-and-save-candidate-1)
+                 (add-hook 'pre-command-hook 'easy-kill-mc-destroy-and-save-candidate-1 t)))
              (error (message "%s:%s" this-command (error-message-string err))
                     nil)))))
        ad-do-it)))
 
-(defun easy-kill-mc-destroy-and-save-candidate ()
+(defun easy-kill-mc-destroy-and-save-candidate-1 ()
   (easy-kill-destroy-candidate)
   (unless (or (easy-kill-get mark) (easy-kill-exit-p this-command))
     (easy-kill-save-candidate)))
 
 (defadvice easy-kill-destroy-candidate
     (around easy-kill-mc activate)
-  "Schedule easy-kill-mc-destroy-candicate after the current command is executed for each cursor."
+  "Schedule easy-kill-mc-destroy-candidate after the current command is executed for each cursor."
   (if (bound-and-true-p multiple-cursors-mode)
-      (setq easy-kill-mc-destroy-candicate-p t)
+      (setq easy-kill-mc-destroy-candidate-p t)
     ad-do-it))
 
 (defun easy-kill-mc-destroy-candidate ()

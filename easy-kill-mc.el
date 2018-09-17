@@ -43,7 +43,7 @@
 (add-to-list 'mc/cursor-specific-vars 'easy-kill-candidate)
 
 (defvar-local easy-kill-mc-easy-mark-or-kill-command nil)
-(defvar-local easy-kill-mc-executing-for-fake-cursor-p nil)
+(defvar-local easy-kill-mc-execute-nest-level 0)
 (defvar-local easy-kill-mc-keep-keymap-p nil)
 (defvar-local easy-kill-mc-destroy-candidate-p nil)
 
@@ -61,17 +61,16 @@
 ;; while in `mc/execute-this-command-for-all-cursors'.
 (defadvice mc/execute-this-command-for-all-cursors
     (around easy-kill-mc activate)
-  (setq easy-kill-mc-executing-for-fake-cursor-p t)
+  (setq easy-kill-mc-execute-nest-level (1+ easy-kill-mc-execute-nest-level))
   (unwind-protect
-      (if easy-kill-mc-destroy-candidate-p
-          (unwind-protect
-              ad-do-it
-            (easy-kill-mc-destroy-candidate)
-            (setq easy-kill-mc-destroy-candidate-p nil))
-        ad-do-it)
-    (remove-hook 'pre-command-hook 'easy-kill-mc-save-candidate-1)
-    (setq easy-kill-mc-executing-for-fake-cursor-p nil
-          easy-kill-mc-easy-mark-or-kill-command nil)))
+      ad-do-it
+    (setq easy-kill-mc-execute-nest-level (1- easy-kill-mc-execute-nest-level))
+    (when (zerop easy-kill-mc-execute-nest-level)
+      (remove-hook 'pre-command-hook 'easy-kill-mc-save-candidate-1)
+      (setq easy-kill-mc-easy-mark-or-kill-command nil)
+      (when easy-kill-mc-destroy-candidate-p
+        (easy-kill-mc-destroy-candidate)
+        (setq easy-kill-mc-destroy-candidate-p nil)))))
 
 (defadvice easy-kill-init-candidate
     (after easy-kill-mc activate)
@@ -83,7 +82,7 @@
       (or
        ;; Set a transient key map just once, ignoring subsequent calls
        ;; for fake cursors.
-       easy-kill-mc-executing-for-fake-cursor-p
+       (< 0 easy-kill-mc-execute-nest-level)
        (set-transient-map
         (easy-kill-map)
         (lambda ()

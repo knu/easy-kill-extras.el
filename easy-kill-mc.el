@@ -94,14 +94,21 @@
            ;; Prevent any error from activating the keymap forever.
            (condition-case err
                (or
-                (let ((map (easy-kill-map)))
-                  (and (not (easy-kill-exit-p this-command))
-                       (or (eq this-command
-                               (lookup-key map (this-single-command-keys)))
-                           (let ((cmd (key-binding
-                                       (this-single-command-keys) nil t)))
-                             (command-remapping cmd nil (list map))))))
+                ;; This command is not marked as exit and it is coming
+                ;; from this keymap, continue.
+                (and
+                 (not (easy-kill-exit-p this-command))
+                 (let ((map (easy-kill-map)))
+                   (or (eq this-command
+                           (lookup-key map (this-single-command-keys)))
+                       (let ((cmd (key-binding
+                                   (this-single-command-keys) nil t)))
+                         (command-remapping cmd nil (list map))))))
                 (ignore
+                 ;; When leaving from this keymap, schedule
+                 ;; easy-kill-mc-destroy-candidate after the current
+                 ;; command is executed for eash cursor and save the
+                 ;; current candidates for each cursor.
                  (setq easy-kill-mc-destroy-candidate-p t)
                  (easy-kill-mc-save-candidate-1)
                  (add-hook 'pre-command-hook 'easy-kill-mc-save-candidate-1 t)))

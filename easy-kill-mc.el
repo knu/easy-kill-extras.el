@@ -69,7 +69,7 @@
             (easy-kill-mc-destroy-candidate)
             (setq easy-kill-mc-destroy-candidate-p nil))
         ad-do-it)
-    (remove-hook 'pre-command-hook 'easy-kill-mc-destroy-and-save-candidate-1)
+    (remove-hook 'pre-command-hook 'easy-kill-mc-save-candidate-1)
     (setq easy-kill-mc-executing-for-fake-cursor-p nil
           easy-kill-mc-easy-mark-or-kill-command nil)))
 
@@ -103,23 +103,16 @@
                                        (this-single-command-keys) nil t)))
                              (command-remapping cmd nil (list map))))))
                 (ignore
-                 (easy-kill-mc-destroy-and-save-candidate-1)
-                 (add-hook 'pre-command-hook 'easy-kill-mc-destroy-and-save-candidate-1 t)))
+                 (setq easy-kill-mc-destroy-candidate-p t)
+                 (easy-kill-mc-save-candidate-1)
+                 (add-hook 'pre-command-hook 'easy-kill-mc-save-candidate-1 t)))
              (error (message "%s:%s" this-command (error-message-string err))
                     nil))))))
     ad-do-it))
 
-(defun easy-kill-mc-destroy-and-save-candidate-1 ()
-  (easy-kill-destroy-candidate)
+(defun easy-kill-mc-save-candidate-1 ()
   (unless (or (easy-kill-get mark) (easy-kill-exit-p this-command))
     (easy-kill-save-candidate)))
-
-(defadvice easy-kill-destroy-candidate
-    (around easy-kill-mc activate)
-  "Schedule easy-kill-mc-destroy-candidate after the current command is executed for each cursor."
-  (if (bound-and-true-p multiple-cursors-mode)
-      (setq easy-kill-mc-destroy-candidate-p t)
-    ad-do-it))
 
 (defun easy-kill-mc-destroy-candidate ()
   (mapc #'(lambda (o)

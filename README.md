@@ -48,6 +48,56 @@ It also provides the following easy-kill/easy-mark targets:
 
   These work like vi's `f`/`F`/`t`/`T` commands, respectively.
 
+## Extra "Things"
+
+This package includes `extra-things.el` which defines various extra "things" that can be used with easy-kill/easy-mark.
+
+``` elisp
+(require 'extra-things)
+
+;; example settings
+(add-to-list 'easy-kill-alist '(?W  WORD " ") t)
+(add-to-list 'easy-kill-alist '(?\' squoted-string "") t)
+(add-to-list 'easy-kill-alist '(?\" dquoted-string "") t)
+(add-to-list 'easy-kill-alist '(?\` bquoted-string "") t)
+(add-to-list 'easy-kill-alist '(?\) parentheses-pair-content "\n") t)
+(add-to-list 'easy-kill-alist '(?\( parentheses-pair "\n") t)
+(add-to-list 'easy-kill-alist '(?\] brackets-pair-content "\n") t)
+(add-to-list 'easy-kill-alist '(?\[ brackets-pair "\n") t)
+(add-to-list 'easy-kill-alist '(?}  curlies-pair-content "\n") t)
+(add-to-list 'easy-kill-alist '(?{  curlies-pair "\n") t)
+(add-to-list 'easy-kill-alist '(?>  angles-pair-content "\n") t)
+(add-to-list 'easy-kill-alist '(?<  angles-pair "\n") t)
+```
+
+* `WORD`: a sequence of non-whitespace characters
+
+  This is much like Vim's WORD object.
+
+* `squoted-string`: a sindle-quoted string ('...')
+* `dquoted-string`: a double-quoted string ("...")
+* `bquoted-string`: a back-quoted string (`...`)
+
+  The backslash character serves as escape character.  For performance
+  reasons, it is assumed that the beginning of the current line is not
+  inside of a quoted string.  In other words, multi-line quoted
+  strings are not fully supported.
+
+* `parentheses-pair`: the block between a parentheses pair including the opening and closing parentheses
+* `brackets-pair`: the block between a brackets pair including the opening and closing brackets
+* `curlies-pair`: the block between a curlies pair including the opening and closing curlies
+* `angles-pair`: the block between an angles pair including the opening and closing angles
+* `parentheses-pair-content`: the content inside of a parentheses pair without whitespace at both ends
+* `brackets-pair-content`: the content inside of a brackets pair without whitespace at both ends
+* `curlies-pair-content`: the content inside of a curlies pair without whitespace at both ends
+* `angles-pair-content`: the content inside of an angles pair without whitespace at both ends
+
+  Quotation marks or different types of pair characters are not
+  taken into account.  Each type of things only cares about the
+  nest level of their pair characters.
+
+  Repeatedly moving forward or backward means to move to outer pairs.
+
 ## Support for packages
 
 Experimental ace-jump integration into easy-kill is enabled by
@@ -129,7 +179,7 @@ To enable interaction between multiple cursors and CUA rectangle copy
 
 ## Author
 
-Copyright (c) 2014-2018 Akinori MUSHA.
+Copyright (c) 2014-2021 Akinori MUSHA.
 
 Licensed under the 2-clause BSD license.  See `LICENSE.txt` for
 details.

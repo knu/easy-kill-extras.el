@@ -42,11 +42,19 @@
 ;; * `squoted-string': a sindle-quoted string ('...')
 ;; * `dquoted-string': a double-quoted string ("...")
 ;; * `bquoted-string': a back-quoted string (`...`)
+;; * `quoted-string': any of the above quoted strings
 ;;
 ;;   The backslash character serves as escape character.  For
 ;;   performance reasons, it is assumed that the beginning of the
 ;;   current line is not inside of a quoted string.  In other words,
 ;;   multi-line quoted strings are not fully supported.
+;;
+;;   These things are aware of the current syntax table, and the
+;;   quotation marks that are a word constituent or an expression
+;;   prefix in the current mode are ignored.  For example,
+;;   `squoted-string' would only work in some specific programming
+;;   language modes where the single quotation mark is a quotation
+;;   character.
 ;;
 ;; * `parentheses-pair': the block between a parentheses pair including the opening and closing parentheses
 ;; * `brackets-pair': the block between a brackets pair including the opening and closing brackets
@@ -88,57 +96,90 @@
 ;; quoted strings
 ;;
 
+(defvar-local extra-things--quote-chars nil)
+(defvar-local extra-things--quoted-string-literal-regexp nil)
+(defvar-local extra-things--nonquoted-string-regexp nil)
+
+(add-hook 'change-major-mode-hook
+          '(lambda () (setq extra-things--quote-chars nil
+                            extra-things--quoted-string-literal-regexp nil
+                            extra-things--nonquoted-string-regexp nil)))
+
+(defun extra-things--get-quote-chars ()
+  (or extra-things--quote-chars
+      (setq-local
+       extra-things--quote-chars
+       (cl-remove-if '(lambda (c) (member (char-syntax c) '(?w ?\' ?\`))) '(?\' ?\" ?\`)))))
+
+(defun extra-things--get-quoted-string-literal-regexp ()
+  (or extra-things--quoted-string-literal-regexp
+      (setq-local
+       extra-things--quoted-string-literal-regexp
+       (mapconcat
+        '(lambda (c) (format "\\=\\(?1:%1$c\\)\\(?:[^%1$c\\\\]+\\|\\\\.\\)*\\(?:%1$c\\|\\'\\)" c))
+        (extra-things--get-quote-chars)
+        "\\|"))))
+
+(defun extra-things--get-nonquoted-string-regexp ()
+  (or extra-things--nonquoted-string-regexp
+      (setq-local
+       extra-things--nonquoted-string-regexp
+       (format "\\=\\(?:[^%s\\\\]+\\|\\\\.\\)+" (concat (extra-things--get-quote-chars))))))
+
 (defmacro define-quoted-string-thing (thing quote)
   "Define THING as a string quoted with QUOTE."
-  (let ((end-op (intern (format "end-op-%s" thing)))
-        (beginning-op (intern (format "beginning-op-%s" thing)))
-        (re-nonquoted "\\=\\(?:[^\"'`\\\\]+\\|\\\\.\\)+")
-        (re-squoted "\\=\\('\\)\\(?:[^'\\\\]+\\|\\\\.\\)*\\(?:'\\|\\'\\)")
-        (re-dquoted "\\=\\(\"\\)\\(?:[^\"\\\\]+\\|\\\\.\\)*\\(?:\"\\|\\'\\)")
-        (re-bquoted "\\=\\(`\\)\\(?:[^`\\\\]+\\|\\\\.\\)*\\(?:`\\|\\'\\)"))
+  (let ((end-op (intern (format "end-of-%s" thing)))
+        (beginning-op (intern (format "beginning-of-%s" thing))))
     `(progn
        (defun ,end-op ()
-         (save-match-data
-           (let ((start (point))
-                 (bound (line-end-position)))
-             (beginning-of-line)
+         (let ((start (point))
+               (bound (line-end-position))
+               (re-nonquoted (extra-things--get-nonquoted-string-regexp))
+               (re-quoted (extra-things--get-quoted-string-literal-regexp)))
+           (beginning-of-line)
+           (save-match-data
              (cl-loop do
-                      (cond ((re-search-forward ,re-nonquoted bound t)
+                      (cond ((re-search-forward re-nonquoted bound t)
                              (when (< start (point))
                                (goto-char start)
                                (return)))
-                            ((or (re-search-forward ,re-squoted nil t)
-                                 (re-search-forward ,re-dquoted nil t)
-                                 (re-search-forward ,re-bquoted nil t))
-                             (if (string= (match-string-no-properties 1) ,quote)
-                                 (when (<= start (point))
-                                   (return))
-                               (when (< start (point))
-                                 (goto-char start)
-                                 (return))))
+                            ((re-search-forward re-quoted nil t)
+                             ,(if quote
+                                  `(if (string= (match-string-no-properties 1) ,quote)
+                                       (when (<= start (point))
+                                         (return))
+                                     (when (< start (point))
+                                       (goto-char start)
+                                       (return)))
+                                '(when (<= start (point))
+                                         (return))))
                             (t
                              (error "BUG")))))))
 
        (defun ,beginning-op ()
-         (save-match-data
-           (let ((start (point))
-                 (bound (line-end-position)))
-             (beginning-of-line)
+         (let ((start (point))
+               (bound (line-end-position))
+               (re-nonquoted (extra-things--get-nonquoted-string-regexp))
+               (re-quoted (extra-things--get-quoted-string-literal-regexp)))
+           (beginning-of-line)
+           (save-match-data
              (cl-loop do
-                      (cond ((re-search-forward ,re-nonquoted bound t)
+                      (cond ((re-search-forward re-nonquoted bound t)
                              (when (< start (point))
                                (goto-char start)
                                (return)))
-                            ((or (re-search-forward ,re-squoted nil t)
-                                 (re-search-forward ,re-dquoted nil t)
-                                 (re-search-forward ,re-bquoted nil t))
-                             (if (string= (match-string-no-properties 1) ,quote)
-                                 (when (<= start (point))
-                                   (goto-char (match-beginning 0))
-                                   (return))
-                               (when (< start (point))
-                                 (goto-char start)
-                                 (return))))
+                            ((re-search-forward re-quoted nil t)
+                             ,(if quote
+                                  `(if (string= (match-string-no-properties 1) ,quote)
+                                       (when (<= start (point))
+                                         (goto-char (match-beginning 0))
+                                         (return))
+                                     (when (< start (point))
+                                       (goto-char start)
+                                       (return)))
+                                '(when (<= start (point))
+                                         (goto-char (match-beginning 0))
+                                         (return))))
                             (t
                              (error "BUG")))))))
 
@@ -148,6 +189,7 @@
 (define-quoted-string-thing squoted-string "'")
 (define-quoted-string-thing dquoted-string "\"")
 (define-quoted-string-thing bquoted-string "`")
+(define-quoted-string-thing quoted-string nil)
 
 ;;
 ;; pairs

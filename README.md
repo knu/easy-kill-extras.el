@@ -60,6 +60,7 @@ This package includes `extra-things.el` which defines various extra "things" tha
 (add-to-list 'easy-kill-alist '(?\' squoted-string "") t)
 (add-to-list 'easy-kill-alist '(?\" dquoted-string "") t)
 (add-to-list 'easy-kill-alist '(?\` bquoted-string "") t)
+(add-to-list 'easy-kill-alist '(?q  quoted-string "") t)
 (add-to-list 'easy-kill-alist '(?\) parentheses-pair-content "\n") t)
 (add-to-list 'easy-kill-alist '(?\( parentheses-pair "\n") t)
 (add-to-list 'easy-kill-alist '(?\] brackets-pair-content "\n") t)
@@ -77,11 +78,18 @@ This package includes `extra-things.el` which defines various extra "things" tha
 * `squoted-string`: a sindle-quoted string ('...')
 * `dquoted-string`: a double-quoted string ("...")
 * `bquoted-string`: a back-quoted string (`...`)
+* `quoted-string`: any of the above quoted strings
 
   The backslash character serves as escape character.  For performance
   reasons, it is assumed that the beginning of the current line is not
   inside of a quoted string.  In other words, multi-line quoted
   strings are not fully supported.
+
+  These things are aware of the current syntax table, and the
+  quotation marks that are a word constituent or an expression prefix
+  in the current mode are ignored.  For example, `squoted-string`
+  would only work in some specific programming language modes where
+  the single quotation mark is a quotation character.
 
 * `parentheses-pair`: the block between a parentheses pair including the opening and closing parentheses
 * `brackets-pair`: the block between a brackets pair including the opening and closing brackets

@@ -56,6 +56,14 @@
 ;;   language modes where the single quotation mark is a quotation
 ;;   character.
 ;;
+;; * `squoted-string-universal'
+;; * `dquoted-string-universal'
+;; * `bquoted-string-universal'
+;; * `quoted-string-universal'
+;;
+;;   These versions recognize all quotation pairs ignoring the current
+;;   syntax table.
+;;
 ;; * `parentheses-pair': the block between a parentheses pair including the opening and closing parentheses
 ;; * `brackets-pair': the block between a brackets pair including the opening and closing brackets
 ;; * `curlies-pair': the block between a curlies pair including the opening and closing curlies
@@ -71,8 +79,10 @@
 
 ;;; Code:
 
+(require 'rx)
 (eval-when-compile
   (require 'cl-lib)
+  (require 'rx)
   (require 'easy-kill))
 
 ;;
@@ -105,37 +115,61 @@
                             extra-things--quoted-string-literal-regexp nil
                             extra-things--nonquoted-string-regexp nil)))
 
+(defvar extra-things--all-quote-chars '(?\' ?\" ?\`))
+
 (defun extra-things--get-quote-chars ()
   (or extra-things--quote-chars
       (setq-local
        extra-things--quote-chars
-       (cl-remove-if '(lambda (c) (member (char-syntax c) '(?w ?\' ?\`))) '(?\' ?\" ?\`)))))
+       (cl-remove-if '(lambda (c) (member (char-syntax c) '(?w ?\' ?\`))) extra-things--all-quote-chars))))
 
-(defun extra-things--get-quoted-string-literal-regexp ()
-  (or extra-things--quoted-string-literal-regexp
-      (setq-local
-       extra-things--quoted-string-literal-regexp
-       (mapconcat
-        '(lambda (c) (format "\\=\\(?1:%1$c\\)\\(?:[^%1$c\\\\]+\\|\\\\.\\)*\\(?:%1$c\\|\\'\\)" c))
-        (extra-things--get-quote-chars)
-        "\\|"))))
+(defmacro extra-things--generate-quoted-string-literal-regexp (quote-chars)
+  `(rx-to-string
+    `(| ,@(mapcar (lambda (c)
+                    `(: point
+                        (group-n 1 ,(char-to-string c))
+                        (* (| (+ (not (any ,c ?\\)))
+                              (: "\\" anychar)))
+                        (| ,(char-to-string c)
+                           eos)))
+                  ,quote-chars))))
 
-(defun extra-things--get-nonquoted-string-regexp ()
-  (or extra-things--nonquoted-string-regexp
-      (setq-local
-       extra-things--nonquoted-string-regexp
-       (format "\\=\\(?:[^%s\\\\]+\\|\\\\.\\)+" (concat (extra-things--get-quote-chars))))))
+(defun extra-things--get-quoted-string-literal-regexp (&optional all)
+  (if all
+      (extra-things--generate-quoted-string-literal-regexp extra-things--all-quote-chars)
+    (or extra-things--quoted-string-literal-regexp
+        (setq-local
+         extra-things--quoted-string-literal-regexp
+         (extra-things--generate-quoted-string-literal-regexp (extra-things--get-quote-chars))))))
+
+(defmacro extra-things--generate-nonquoted-string-regexp (quote-chars)
+  `(rx-to-string
+    `(: point
+        (+ (| (+ (not (any ?\\ ,@,quote-chars)))
+              (: "\\" anychar))))))
+
+(defun extra-things--get-nonquoted-string-regexp (&optional all)
+  (if all
+      (extra-things--generate-nonquoted-string-regexp extra-things--all-quote-chars)
+    (or extra-things--nonquoted-string-regexp
+        (setq-local
+         extra-things--nonquoted-string-regexp
+         (extra-things--generate-nonquoted-string-regexp (extra-things--get-quote-chars))))))
 
 (defmacro define-quoted-string-thing (thing quote)
   "Define THING as a string quoted with QUOTE."
-  (let ((end-op (intern (format "end-of-%s" thing)))
-        (beginning-op (intern (format "beginning-of-%s" thing))))
+  (let* ((end-op (intern (format "end-of-%s" thing)))
+         (beginning-op (intern (format "beginning-of-%s" thing)))
+         (thing-universal (intern (format "%s-universal" thing)))
+         (end-op-universal (intern (format "end-of-%s" thing-universal)))
+         (beginning-op-universal (intern (format "beginning-of-%s" thing-universal))))
     `(progn
-       (defun ,end-op ()
+       (defun ,end-op (&optional arg)
+         (interactive "P")
          (let ((start (point))
                (bound (line-end-position))
-               (re-nonquoted (extra-things--get-nonquoted-string-regexp))
-               (re-quoted (extra-things--get-quoted-string-literal-regexp)))
+               (re-nonquoted (extra-things--get-nonquoted-string-regexp arg))
+               (re-quoted (extra-things--get-quoted-string-literal-regexp arg)))
            (beginning-of-line)
            (save-match-data
              (cl-loop do
@@ -152,15 +186,16 @@
                                        (goto-char start)
                                        (return)))
                                 '(when (<= start (point))
-                                         (return))))
+                                   (return))))
                             (t
                              (error "BUG")))))))
 
-       (defun ,beginning-op ()
+       (defun ,beginning-op (&optional arg)
+         (interactive "P")
          (let ((start (point))
                (bound (line-end-position))
-               (re-nonquoted (extra-things--get-nonquoted-string-regexp))
-               (re-quoted (extra-things--get-quoted-string-literal-regexp)))
+               (re-nonquoted (extra-things--get-nonquoted-string-regexp arg))
+               (re-quoted (extra-things--get-quoted-string-literal-regexp arg)))
            (beginning-of-line)
            (save-match-data
              (cl-loop do
@@ -178,13 +213,23 @@
                                        (goto-char start)
                                        (return)))
                                 '(when (<= start (point))
-                                         (goto-char (match-beginning 0))
-                                         (return))))
+                                   (goto-char (match-beginning 0))
+                                   (return))))
                             (t
                              (error "BUG")))))))
 
        (put ',thing 'end-op ',end-op)
-       (put ',thing 'beginning-op ',beginning-op))))
+       (put ',thing 'beginning-op ',beginning-op)
+
+       (defun ,end-op-universal ()
+         (interactive)
+         (,end-op t))
+       (defun ,beginning-op-universal ()
+         (interactive)
+         (,beginning-op t))
+
+       (put ',thing-universal 'end-op ',end-op-universal)
+       (put ',thing-universal 'beginning-op ',beginning-op-universal))))
 
 (define-quoted-string-thing squoted-string "'")
 (define-quoted-string-thing dquoted-string "\"")

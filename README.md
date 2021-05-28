@@ -61,6 +61,7 @@ This package includes `extra-things.el` which defines various extra "things" tha
 (add-to-list 'easy-kill-alist '(?\" dquoted-string "") t)
 (add-to-list 'easy-kill-alist '(?\` bquoted-string "") t)
 (add-to-list 'easy-kill-alist '(?q  quoted-string "") t)
+(add-to-list 'easy-kill-alist '(?Q  quoted-string-universal "") t)
 (add-to-list 'easy-kill-alist '(?\) parentheses-pair-content "\n") t)
 (add-to-list 'easy-kill-alist '(?\( parentheses-pair "\n") t)
 (add-to-list 'easy-kill-alist '(?\] brackets-pair-content "\n") t)
@@ -90,6 +91,13 @@ This package includes `extra-things.el` which defines various extra "things" tha
   in the current mode are ignored.  For example, `squoted-string`
   would only work in some specific programming language modes where
   the single quotation mark is a quotation character.
+
+* `squoted-string-universal`
+* `dquoted-string-universal`
+* `bquoted-string-universal`
+* `quoted-string-universal`
+
+  These versions recognize all quotation pairs ignoring the current syntax table.
 
 * `parentheses-pair`: the block between a parentheses pair including the opening and closing parentheses
 * `brackets-pair`: the block between a brackets pair including the opening and closing brackets

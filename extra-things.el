@@ -79,6 +79,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'rx)
 (eval-when-compile
   (require 'cl-lib)

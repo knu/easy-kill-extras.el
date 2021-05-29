@@ -97,7 +97,8 @@ This package includes `extra-things.el` which defines various extra "things" tha
 * `bquoted-string-universal`
 * `quoted-string-universal`
 
-  These versions recognize all quotation pairs ignoring the current syntax table.
+  These versions recognize all quotation pairs ignoring the current
+  syntax table and support nesting of different quotations.
 
 * `parentheses-pair`: the block between a parentheses pair including the opening and closing parentheses
 * `brackets-pair`: the block between a brackets pair including the opening and closing brackets

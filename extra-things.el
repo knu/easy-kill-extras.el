@@ -62,7 +62,7 @@
 ;; * `quoted-string-universal'
 ;;
 ;;   These versions recognize all quotation pairs ignoring the current
-;;   syntax table.
+;;   syntax table and support nesting of different quotations.
 ;;
 ;; * `parentheses-pair': the block between a parentheses pair including the opening and closing parentheses
 ;; * `brackets-pair': the block between a brackets pair including the opening and closing brackets
@@ -177,17 +177,25 @@
                       (cond ((re-search-forward re-nonquoted bound t)
                              (when (< start (point))
                                (goto-char start)
-                               (return)))
+                               (return nil)))
                             ((re-search-forward re-quoted nil t)
                              ,(if quote
                                   `(if (string= (match-string-no-properties 1) ,quote)
                                        (when (<= start (point))
-                                         (return))
+                                         (return nil))
                                      (when (< start (point))
                                        (goto-char start)
-                                       (return)))
-                                '(when (<= start (point))
-                                   (return))))
+                                       (return nil)))
+                                `(when (<= start (point))
+                                   (if arg
+                                       (let ((qbeg (match-beginning 0))
+                                             (qend (point)))
+                                         (goto-char start)
+                                         (or (save-restriction
+                                               (narrow-to-region (1+ qbeg) (1- qend))
+                                               (,end-op arg))
+                                             (goto-char qend))))
+                                   (return t))))
                             (t
                              (error "BUG")))))))
 
@@ -203,19 +211,30 @@
                       (cond ((re-search-forward re-nonquoted bound t)
                              (when (< start (point))
                                (goto-char start)
-                               (return)))
+                               (return nil)))
                             ((re-search-forward re-quoted nil t)
                              ,(if quote
                                   `(if (string= (match-string-no-properties 1) ,quote)
                                        (when (<= start (point))
                                          (goto-char (match-beginning 0))
-                                         (return))
+                                         (return t))
                                      (when (< start (point))
                                        (goto-char start)
-                                       (return)))
-                                '(when (<= start (point))
-                                   (goto-char (match-beginning 0))
-                                   (return))))
+                                       (return nil)))
+                                `(cond ((= start (point))
+                                        (goto-char (match-beginning 0))
+                                        (return t))
+                                       ((< start (point))
+                                        (if arg
+                                            (let ((qbeg (match-beginning 0))
+                                                  (qend (point)))
+                                              (goto-char start)
+                                              (or (save-restriction
+                                                    (narrow-to-region (1+ qbeg) (1- qend))
+                                                    (,beginning-op arg))
+                                                  (goto-char qbeg)))
+                                          (goto-char (match-beginning 0)))
+                                        (return t)))))
                             (t
                              (error "BUG")))))))
 

@@ -182,10 +182,10 @@
                              ,(if quote
                                   `(if (string= (match-string-no-properties 1) ,quote)
                                        (when (<= start (point))
-                                         (return nil))
+                                         (cl-return nil))
                                      (when (< start (point))
                                        (goto-char start)
-                                       (return nil)))
+                                       (cl-return nil)))
                                 `(when (<= start (point))
                                    (if arg
                                        (let ((qbeg (match-beginning 0))
@@ -195,7 +195,7 @@
                                                (narrow-to-region (1+ qbeg) (1- qend))
                                                (,end-op arg))
                                              (goto-char qend))))
-                                   (return t))))
+                                   (cl-return t))))
                             (t
                              (error "BUG")))))))
 
@@ -211,19 +211,19 @@
                       (cond ((re-search-forward re-nonquoted bound t)
                              (when (< start (point))
                                (goto-char start)
-                               (return nil)))
+                               (cl-return nil)))
                             ((re-search-forward re-quoted nil t)
                              ,(if quote
                                   `(if (string= (match-string-no-properties 1) ,quote)
                                        (when (<= start (point))
                                          (goto-char (match-beginning 0))
-                                         (return t))
+                                         (cl-return t))
                                      (when (< start (point))
                                        (goto-char start)
-                                       (return nil)))
+                                       (cl-return nil)))
                                 `(cond ((= start (point))
                                         (goto-char (match-beginning 0))
-                                        (return t))
+                                        (cl-return t))
                                        ((< start (point))
                                         (if arg
                                             (let ((qbeg (match-beginning 0))
@@ -234,7 +234,7 @@
                                                     (,beginning-op arg))
                                                   (goto-char qbeg)))
                                           (goto-char (match-beginning 0)))
-                                        (return t)))))
+                                        (cl-return t)))))
                             (t
                              (error "BUG")))))))
 

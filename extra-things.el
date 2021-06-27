@@ -296,7 +296,7 @@
                           (setq level (1+ level))
                         (setq level (1- level))
                         (if (zerop level)
-                            (return))))
+                            (cl-return))))
              (or (zerop level)
                  (progn
                    (goto-char start)
@@ -313,7 +313,7 @@
                           (setq level (1+ level))
                         (setq level (1- level))
                         (if (zerop level)
-                            (return))))
+                            (cl-return))))
              (or (zerop level)
                  (progn
                    (goto-char start)
@@ -394,7 +394,7 @@
                           (setq level (1+ level))
                         (setq level (1- level))
                         (if (zerop level)
-                            (return))))
+                            (cl-return))))
              (if (< 0 level)
                  (progn
                    (goto-char start)
@@ -416,7 +416,7 @@
                           (setq level (1+ level))
                         (setq level (1- level))
                         (if (zerop level)
-                            (return))))
+                            (cl-return))))
              (if (< 0 level)
                  (progn
                    (goto-char start)

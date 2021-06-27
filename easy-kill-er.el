@@ -38,6 +38,7 @@
 ;;; Code:
 
 (require 'easy-kill)
+(require 'cl-lib)
 
 (defvar easy-kill-er-history nil)
 
@@ -72,12 +73,12 @@ candidate ARG times."
                  (let ((er/history))
                    (push-mark beg t t)
                    (goto-char end)
-                   (loop repeat arg
+                   (cl-loop repeat arg
                          until (let ((prev (list (point) (mark))))
                                  (or (eq 'early-exit (er--expand-region-1))
                                      (ignore (push prev easy-kill-er-history)))))
                    (list (point) (mark)))
-               (loop repeat (1- (if (zerop arg) (length easy-kill-er-history) arg))
+               (cl-loop repeat (1- (if (zerop arg) (length easy-kill-er-history) arg))
                      do (pop easy-kill-er-history))
                (pop easy-kill-er-history)))))))
 

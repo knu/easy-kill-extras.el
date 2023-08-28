@@ -1,6 +1,6 @@
 ;;; easy-kill-er.el --- Integration of `expand-region' into `easy-kill'.
 
-;; Copyright (c) 2018 Akinori MUSHA
+;; Copyright (c) 2018-2023 Akinori MUSHA
 ;;
 ;; All rights reserved.
 ;;
@@ -38,21 +38,9 @@
 ;;; Code:
 
 (require 'easy-kill)
+(require 'cl-lib)
 
 (defvar easy-kill-er-history nil)
-
-(defun easy-kill-er-expand ()
-  (interactive)
-  "Expand current candidate using `expand-region'."
-  (pcase (easy-kill-get bounds)
-    (`(nil . nil))
-    (`(,beg . ,end)
-     (apply 'easy-kill-adjust-candidate (easy-kill-get thing)
-            (save-excursion
-              (push-mark beg t t)
-              (goto-char end)
-              (er--expand-region-1)
-              (list (point) (mark)))))))
 
 ;;;###autoload
 (defun easy-kill-er-expand (arg)
@@ -72,13 +60,13 @@ candidate ARG times."
                  (let ((er/history))
                    (push-mark beg t t)
                    (goto-char end)
-                   (loop repeat arg
-                         until (let ((prev (list (point) (mark))))
-                                 (or (eq 'early-exit (er--expand-region-1))
-                                     (ignore (push prev easy-kill-er-history)))))
+                   (cl-loop repeat arg
+                            until (let ((prev (list (point) (mark))))
+                                    (or (eq 'early-exit (er--expand-region-1))
+                                        (ignore (push prev easy-kill-er-history)))))
                    (list (point) (mark)))
-               (loop repeat (1- (if (zerop arg) (length easy-kill-er-history) arg))
-                     do (pop easy-kill-er-history))
+               (cl-loop repeat (1- (if (zerop arg) (length easy-kill-er-history) arg))
+                        do (pop easy-kill-er-history))
                (pop easy-kill-er-history)))))))
 
 ;;;###autoload

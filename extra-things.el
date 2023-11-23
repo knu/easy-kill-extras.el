@@ -1,5 +1,11 @@
 ;;; extra-things.el --- defines various extra "things".
 
+;; Author: Akinori MUSHA <knu@iDaemons.org>
+;; URL: https://github.com/knu/easy-kill-extras.el
+;; Created: 22 May 2021
+;; Package-Requires: ((easy-kill "0.9.4"))
+;; Keywords: killing, convenience
+
 ;; Copyright (c) 2021 Akinori MUSHA
 ;;
 ;; All rights reserved.
@@ -24,12 +30,6 @@
 ;; LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 ;; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
-
-;; Author: Akinori MUSHA <knu@iDaemons.org>
-;; URL: https://github.com/knu/easy-kill-extras.el
-;; Created: 22 May 2021
-;; Package-Requires: ((easy-kill "0.9.4"))
-;; Keywords: killing, convenience
 
 ;;; Commentary:
 ;;

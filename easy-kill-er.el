@@ -1,5 +1,11 @@
 ;;; easy-kill-er.el --- Integration of `expand-region' into `easy-kill'.
 
+;; Author: Akinori MUSHA <knu@iDaemons.org>
+;; URL: https://github.com/knu/easy-kill-extras.el
+;; Created: 20 Sep 2018
+;; Package-Requires: ((easy-kill "0.9.4") (expand-region "0"))
+;; Keywords: killing, cursors, convenience
+
 ;; Copyright (c) 2018-2023 Akinori MUSHA
 ;;
 ;; All rights reserved.
@@ -24,12 +30,6 @@
 ;; LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 ;; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
-
-;; Author: Akinori MUSHA <knu@iDaemons.org>
-;; URL: https://github.com/knu/easy-kill-extras.el
-;; Created: 20 Sep 2018
-;; Package-Requires: ((easy-kill "0.9.4") (expand-region "0"))
-;; Keywords: killing, cursors, convenience
 
 ;;; Commentary:
 ;;

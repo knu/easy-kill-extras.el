@@ -1,5 +1,11 @@
 ;;; easy-kill-line-edge.el --- line-edge selectors for easy-kill.
 
+;; Author: Akinori MUSHA <knu@iDaemons.org>
+;; URL: https://github.com/knu/easy-kill-extras.el
+;; Created: 4 Mar 2015
+;; Package-Requires: ((easy-kill "0.9.4"))
+;; Keywords: killing, convenience
+
 ;; Copyright (c) 2014-2015 Akinori MUSHA
 ;;
 ;; All rights reserved.
@@ -24,12 +30,6 @@
 ;; LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 ;; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
-
-;; Author: Akinori MUSHA <knu@iDaemons.org>
-;; URL: https://github.com/knu/easy-kill-extras.el
-;; Created: 4 Mar 2015
-;; Package-Requires: ((easy-kill "0.9.4"))
-;; Keywords: killing, convenience
 
 ;;; Commentary:
 ;;

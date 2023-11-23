@@ -1,6 +1,12 @@
 ;;; easy-kill-to-char.el --- vi-like to-char/up-to-char selectors for easy-kill.
 
-;; Copyright (c) 2014-2016 Akinori MUSHA
+;; Author: Akinori MUSHA <knu@iDaemons.org>
+;; URL: https://github.com/knu/easy-kill-extras.el
+;; Created: 4 Mar 2015
+;; Package-Requires: ((easy-kill "0.9.4"))
+;; Keywords: killing, convenience
+
+;; Copyright (c) 2014-2023 Akinori MUSHA
 ;;
 ;; All rights reserved.
 ;;
@@ -24,12 +30,6 @@
 ;; LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 ;; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
-
-;; Author: Akinori MUSHA <knu@iDaemons.org>
-;; URL: https://github.com/knu/easy-kill-extras.el
-;; Created: 4 Mar 2015
-;; Package-Requires: ((easy-kill "0.9.4"))
-;; Keywords: killing, convenience
 
 ;;; Commentary:
 ;;

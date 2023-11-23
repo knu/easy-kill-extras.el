@@ -1,5 +1,11 @@
 ;;; easy-kill-mc.el --- multiple-cursors-mode support for easy-kill.
 
+;; Author: Akinori MUSHA <knu@iDaemons.org>
+;; URL: https://github.com/knu/easy-kill-extras.el
+;; Created: 11 Sep 2018
+;; Package-Requires: ((easy-kill "0.9.4") (multiple-cursors "1.4.0"))
+;; Keywords: killing, cursors, convenience
+
 ;; Copyright (c) 2018 Akinori MUSHA
 ;;
 ;; All rights reserved.
@@ -24,12 +30,6 @@
 ;; LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 ;; OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ;; SUCH DAMAGE.
-
-;; Author: Akinori MUSHA <knu@iDaemons.org>
-;; URL: https://github.com/knu/easy-kill-extras.el
-;; Created: 11 Sep 2018
-;; Package-Requires: ((easy-kill "0.9.4") (multiple-cursors "1.4.0"))
-;; Keywords: killing, cursors, convenience
 
 ;;; Commentary:
 ;;

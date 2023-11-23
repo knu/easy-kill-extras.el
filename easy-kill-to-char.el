@@ -86,7 +86,14 @@
                                        (goto-char pos)
                                        (,search-func (char-to-string c) nil nil n)
                                        (point))
-                                   (,(intern (concat command-prefix (funcall format-name include (not backward)))) '-)
+                                   (condition-case nil
+                                       (,(intern (concat command-prefix (funcall format-name include (not backward)))) '-)
+                                     (error
+                                      (overlay-put easy-kill-candidate 'zap-pos beg)
+                                      (condition-case nil
+                                          (,(intern (concat command-prefix (funcall format-name include backward))) 1)
+                                        (error
+                                         (overlay-put easy-kill-candidate 'zap-pos pos)))))
                                    nil))
                                 (t
                                  (save-excursion

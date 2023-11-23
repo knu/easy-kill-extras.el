@@ -46,23 +46,22 @@
 (defvar-local easy-kill-mc-keep-keymap-p nil)
 (defvar-local easy-kill-mc-destroy-candidate-p nil)
 
-(defadvice easy-mark
-    (before easy-kill-mc activate)
+(defun easy-mark--ad-easy-kill-mc (&rest args)
   (setq easy-kill-mc-easy-mark-or-kill-command 'easy-mark))
+(advice-add #'easy-mark :before #'easy-mark--ad-easy-kill-mc)
 
-(defadvice easy-kill
-    (before easy-kill-mc activate)
+(defun easy-kill--ad-easy-kill-mc (&rest args)
   (setq easy-kill-mc-easy-mark-or-kill-command 'easy-kill))
+(advice-add #'easy-kill :before #'easy-kill--ad-easy-kill-mc)
 
 ;; The original `easy-kill-destroy-candidate' registers a one-time
 ;; function to `post-command-hook', but it is not sufficient in
 ;; multiple cursors mode.  We have to destroy all candidates at once
 ;; while in `mc/execute-this-command-for-all-cursors'.
-(defadvice mc/execute-this-command-for-all-cursors
-    (around easy-kill-mc activate)
-  (setq easy-kill-mc-execute-nest-level (1+ easy-kill-mc-execute-nest-level))
+(defun mc/execute-this-command-for-all-cursors--ad-easy-kill-mc (orig-func &rest args)
+    (setq easy-kill-mc-execute-nest-level (1+ easy-kill-mc-execute-nest-level))
   (unwind-protect
-      ad-do-it
+      (apply orig-func args)
     (setq easy-kill-mc-execute-nest-level (1- easy-kill-mc-execute-nest-level))
     (when (zerop easy-kill-mc-execute-nest-level)
       (remove-hook 'pre-command-hook 'easy-kill-mc-save-candidate-1)
@@ -70,13 +69,13 @@
       (when easy-kill-mc-destroy-candidate-p
         (easy-kill-mc-destroy-candidate)
         (setq easy-kill-mc-destroy-candidate-p nil)))))
+(advice-add #'mc/execute-this-command-for-all-cursors :around #'mc/execute-this-command-for-all-cursors--ad-easy-kill-mc)
 
-(defadvice easy-kill-init-candidate
-    (after easy-kill-mc activate)
+(defun easy-kill-init-candidate--ad-easy-kill-mc (&rest args)
   (overlay-put easy-kill-candidate 'type 'easy-kill-candidate))
+(advice-add #'easy-kill-init-candidate :after #'easy-kill-init-candidate--ad-easy-kill-mc)
 
-(defadvice easy-kill-activate-keymap
-    (around easy-kill-mc activate)
+(defun easy-kill-activate-keymap--ad-easy-kill-mc (orig-func)
   (if (bound-and-true-p multiple-cursors-mode)
       (or
        ;; Set a transient key map just once, ignoring subsequent calls
@@ -113,7 +112,8 @@
                  (add-hook 'pre-command-hook 'easy-kill-mc-save-candidate-1 t)))
              (error (message "%s:%s" this-command (error-message-string err))
                     nil))))))
-    ad-do-it))
+    (funcall orig-func)))
+(advice-add #'easy-kill-activate-keymap :around #'easy-kill-activate-keymap--ad-easy-kill-mc)
 
 (defun easy-kill-mc-save-candidate-1 ()
   (unless (or (easy-kill-get mark) (easy-kill-exit-p this-command))

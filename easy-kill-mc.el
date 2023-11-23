@@ -38,7 +38,6 @@
 ;;; Code:
 
 (require 'easy-kill)
-(require 'multiple-cursors)
 
 (add-to-list 'mc/cursor-specific-vars 'easy-kill-candidate)
 

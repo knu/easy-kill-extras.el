@@ -42,7 +42,6 @@
 ;;; Code:
 
 (require 'easy-kill)
-(require 'ace-jump-mode)
 
 ;;;###autoload
 (defcustom easy-kill-ace-jump-enable-p t

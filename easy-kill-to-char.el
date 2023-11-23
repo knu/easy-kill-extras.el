@@ -84,7 +84,6 @@
                                  (if ,(if backward '(<= pos beg) '(<= beg pos))
                                      (save-excursion
                                        (goto-char pos)
-                                       ,@(unless backward '((forward-char)))
                                        (,search-func (char-to-string c) nil nil n)
                                        (point))
                                    (,(intern (concat command-prefix (funcall format-name include (not backward)))) '-)

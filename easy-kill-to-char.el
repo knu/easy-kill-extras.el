@@ -80,42 +80,44 @@
               (pos (cond ((natnump n)
                           (cond ((and pos
                                       (not (eq this-command 'easy-kill-digit-argument)))
-                                 ;; if called consecutively, expand or shrink
-                                 (if ,(if backward '(<= pos beg) '(<= beg pos))
+                                 ;; if called consecutively
+                                 (if (,(if backward '>= '<=) beg pos)
+                                     ;; expand
                                      (save-excursion
                                        (goto-char pos)
-                                       (,search-func (char-to-string c) nil nil n)
-                                       (point))
-                                   (condition-case nil
-                                       (,(intern (concat command-prefix (funcall format-name include (not backward)))) '-)
-                                     (error
+                                       (and (,search-func (char-to-string c) nil t n)
+                                            (point)))
+                                   ;; shrink
+                                   (unless (ignore-errors (,(intern (concat command-prefix (funcall format-name include (not backward)))) '-))
+                                     ;; or cross over to the other side
                                       (overlay-put easy-kill-candidate 'zap-pos beg)
-                                      (condition-case nil
-                                          (,(intern (concat command-prefix (funcall format-name include backward))) 1)
-                                        (error
-                                         (overlay-put easy-kill-candidate 'zap-pos pos)))))
+                                      (unless (ignore-errors (,(intern (concat command-prefix name)) 1))
+                                        (overlay-put easy-kill-candidate 'zap-pos pos)))
                                    nil))
                                 (t
+                                 ;; first time or with a digit argument
                                  (save-excursion
-                                   ,@(unless backward '((forward-char)))
+                                   ;; find the next occurrence excluding the character at point
+                                   ,@(unless backward '((forward-char 1)))
+                                   ;; signal an error if not found to avoid fallback
                                    (,search-func (char-to-string c) nil nil n)
                                    (point)))))
                          ((eq n '+)
                           (save-excursion
                             (goto-char pos)
-                            (,search-func (char-to-string c))
-                            (point)))
+                            (and (,search-func (char-to-string c) nil t)
+                                 (point))))
                          ((eq n '-)
                           (save-excursion
                             (goto-char (,(if backward '1+ '1-) pos))
-                            (,search-func (char-to-string c) beg nil -1)
-                            (,(if backward '1- '1+) (point)))))))
+                            (and (,search-func (char-to-string c) ,(if backward 'beg '(1+ beg)) t -1)
+                                 (,(if backward '1- '1+) (point))))))))
          (when pos
-           (easy-kill-adjust-candidate ',name
-                                       beg ,(if include 'pos
-                                              (if backward '(1+ pos) '(1- pos))))
+           (easy-kill-adjust-candidate ',(intern name)
+                                       beg ,(if include 'pos `(,(if backward '1+ '1-) pos)))
            (overlay-put easy-kill-candidate 'zap-char c)
-           (overlay-put easy-kill-candidate 'zap-pos pos))))))
+           (overlay-put easy-kill-candidate 'zap-pos pos)
+           t)))))
 
 (easy-kill-defun-string-to-char t nil)
 (easy-kill-defun-string-to-char t t)

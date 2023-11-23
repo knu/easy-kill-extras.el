@@ -6,7 +6,7 @@
 ;; Package-Requires: ((easy-kill "0.9.4"))
 ;; Keywords: killing, convenience
 
-;; Copyright (c) 2014-2015 Akinori MUSHA
+;; Copyright (c) 2014-2023 Akinori MUSHA
 ;;
 ;; All rights reserved.
 ;;
@@ -68,7 +68,7 @@ If ARG is 2 or greater, move to the EOL."
     ((pred (<= 2))
      (end-of-line))
     (-1
-     (if (looking-back "^[[:space:]]*")
+     (if (looking-back "^[[:space:]]*" 100)
          (beginning-of-line)
        (back-to-indentation)))
     (_

@@ -6,7 +6,7 @@
 ;; Package-Requires: ((easy-kill "0.9.4"))
 ;; Keywords: killing, convenience
 
-;; Copyright (c) 2014-2015 Akinori MUSHA
+;; Copyright (c) 2014-2023 Akinori MUSHA
 ;;
 ;; All rights reserved.
 ;;
@@ -54,9 +54,9 @@ The +/- operation determines inclusion/exclusion of the current line."
   (easy-kill-adjust-candidate 'buffer-after-point
                               (pcase n
                                 (`+
-                                 (point-at-bol))
+                                 (line-beginning-position))
                                 (`-
-                                 (point-at-bol 2))
+                                 (line-beginning-position 2))
                                 (_
                                  (point)))
                               (point-max)))
@@ -69,9 +69,9 @@ The +/- operation determines inclusion/exclusion of the current line."
                                    (point-min)
                                    (pcase n
                                      (`+
-                                      (point-at-bol 2))
+                                      (line-beginning-position 2))
                                      (`-
-                                      (point-at-bol))
+                                      (line-beginning-position))
                                      (_
                                       (point)))))
 

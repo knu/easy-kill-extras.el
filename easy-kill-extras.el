@@ -3,7 +3,7 @@
 ;; Author: Akinori MUSHA <knu@iDaemons.org>
 ;; URL: https://github.com/knu/easy-kill-extras.el
 ;; Created: 29 Jul 2014
-;; Version: 0.9.13
+;; Version: 0.9.14
 ;; Package-Requires: ((easy-kill "0.9.4"))
 ;; Keywords: killing, convenience
 

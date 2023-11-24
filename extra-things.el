@@ -112,9 +112,9 @@
 (defvar-local extra-things--nonquoted-string-regexp nil)
 
 (add-hook 'change-major-mode-hook
-          '(lambda () (setq extra-things--quote-chars nil
-                            extra-things--quoted-string-literal-regexp nil
-                            extra-things--nonquoted-string-regexp nil)))
+          (lambda () (setq extra-things--quote-chars nil
+                           extra-things--quoted-string-literal-regexp nil
+                           extra-things--nonquoted-string-regexp nil)))
 
 (defvar extra-things--all-quote-chars '(?\' ?\" ?\`))
 
@@ -122,7 +122,7 @@
   (or extra-things--quote-chars
       (setq-local
        extra-things--quote-chars
-       (cl-remove-if '(lambda (c) (member (char-syntax c) '(?w ?\' ?\`))) extra-things--all-quote-chars))))
+       (cl-remove-if (lambda (c) (member (char-syntax c) '(?w ?\' ?\`))) extra-things--all-quote-chars))))
 
 (defmacro extra-things--generate-quoted-string-literal-regexp (quote-chars)
   `(rx-to-string

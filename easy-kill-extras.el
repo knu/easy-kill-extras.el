@@ -7,7 +7,7 @@
 ;; Package-Requires: ((easy-kill "0.9.4"))
 ;; Keywords: killing, convenience
 
-;; Copyright (c) 2014-2023 Akinori MUSHA
+;; Copyright (c) 2014-2024 Akinori MUSHA
 ;;
 ;; All rights reserved.
 ;;
@@ -124,7 +124,6 @@
 (require 'easy-kill-buffer)
 (require 'easy-kill-line-edge)
 
-;;;###autoload
 (defadvice easy-mark
     (around per-thing activate)
   "Enable `easy-mark-word' and `easy-mark-sexp'."

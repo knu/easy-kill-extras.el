@@ -22,6 +22,11 @@ Here is a list of the interactive commands provided by easy-kill-extras:
   respectively, integrating the functionality of the `expand-region`
   package into `easy-kill`.
 
+  The easy-kill-extras package does not list the
+  [expand-region](https://github.com/magnars/expand-region.el) package
+  as its dependency because it is optional, so you need to install it
+  separately if you want to use these commands.
+
 ## Kill Targets
 
 It also provides the following easy-kill/easy-mark targets:

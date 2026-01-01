@@ -15,6 +15,20 @@ Here is a list of the interactive commands provided by easy-kill-extras:
   These are shorthand commands for easy-marking an aimed string at
   point.
 
+* easy-dup (alias: easy-dup-after)
+* easy-dup-before
+
+  These duplicate the current selection.  When not in
+  easy-kill/easy-mark, use the active region if available, or enter
+  easy-mark to select something to duplicate.  `rectangle-mark-mode`
+  is also supported.
+
+  Example:
+
+  ``` elisp
+  (global-set-key (kbd "C-x y") 'easy-dup)
+  ```
+
 * easy-kill-er-expand
 * easy-kill-er-unexpand
 

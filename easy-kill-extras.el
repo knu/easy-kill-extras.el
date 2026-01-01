@@ -120,6 +120,7 @@
   "Extras for easy-kill."
   :group 'killing) ;; No 'easy-kill yet
 
+(require 'easy-dup)
 (require 'easy-kill-to-char)
 (require 'easy-kill-buffer)
 (require 'easy-kill-line-edge)

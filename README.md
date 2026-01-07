@@ -23,6 +23,8 @@ Here is a list of the interactive commands provided by easy-kill-extras:
   easy-mark to select something to duplicate.  `rectangle-mark-mode`
   is also supported.
 
+  Note: These functions have been merged into the easy-kill package.
+
   Example:
 
   ``` elisp

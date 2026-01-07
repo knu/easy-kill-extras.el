@@ -35,6 +35,8 @@
 ;;
 ;; This library adds easy-dup functions to easy-kill.
 ;;
+;; Note: These functions have been merged into the easy-kill package.
+;;
 ;; This library is part of the easy-kill-extras package and not meant
 ;; to be used standalone.
 
